@@ -1,0 +1,61 @@
+{
+ "h_prior": {
+  "road": [
+   1.0,
+   0.03
+  ],
+  "trail": [
+   1.07,
+   0.06
+  ]
+ },
+ "sd_eta": {
+  "road": 0.02,
+  "trail": 0.05
+ },
+ "sd_gps": {
+  "road": 0.01,
+  "trail": 0.03
+ },
+ "sd_grade_run": 0.04,
+ "sd_grade_walk": 0.06,
+ "descent_slope": 1.5,
+ "ecc_lambda": 0.5,
+ "tau_grid": [
+  20.0,
+  35.0,
+  50.0,
+  65.0,
+  80.0,
+  100.0,
+  120.0
+ ],
+ "tau_prior": [
+  55.0,
+  30.0
+ ],
+ "drift_prior": [
+  0.05,
+  0.05
+ ],
+ "sd_hr_win": 1.2,
+ "sd_int": 3.0,
+ "sd_sys_rel": 0.025,
+ "sd_walk_econ": 0.06,
+ "min_windows": 20,
+ "max_sd": 4.0,
+ "huber_c": 2.0,
+ "v_grid": [
+  20.0,
+  90.0,
+  0.1
+ ],
+ "use_lag": true,
+ "use_gait": true,
+ "use_weights": true,
+ "use_altitude": true,
+ "use_drift": true,
+ "use_descent_model": true,
+ "use_h": false,
+ "exclude_descents": 1.0
+}

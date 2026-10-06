@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the preprint."
+title: "ASCENT: terrain dependence of heart-rate-based VO2max estimation"
+authors:
+  - family-names: "García"
+    given-names: "José A."
+    orcid: "https://orcid.org/0000-0001-7742-7270"
+    affiliation: "University of Granada"
+  - family-names: "Rodriguez-Sánchez"
+    given-names: "Rosa"
+    orcid: "https://orcid.org/0000-0001-7886-9329"
+    affiliation: "University of Granada"
+date-released: 2026-10-06
+license: MIT
+repository-code: "https://github.com/rosadecsai/ascent-vo2max"
+preferred-citation:
+  type: article
+  title: "Terrain dependence of heart-rate-based VO2max estimation: mechanisms, a within-runner field test on 9,962 runs, and a terrain-robust estimator"
+  authors:
+    - family-names: "García"
+      given-names: "José A."
+    - family-names: "Rodriguez-Sánchez"
+      given-names: "Rosa"
+  year: 2026
+  journal: "arXiv preprint"
