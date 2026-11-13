@@ -187,7 +187,7 @@ class Session:
     dist: np.ndarray       # recorded cumulative GPS (horizontal) distance (m)
     alt: np.ndarray        # recorded barometric altitude (m)
     cad: np.ndarray        # cadence (Strava units: rpm = steps/min/2)
-    eta_hat: np.ndarray    # accelerometer terrain proxy (Garmin-like)
+    eta_hat: np.ndarray    # accelerometer terrain proxy (used by the reconstructions)
     surface: np.ndarray
     truth: dict = field(default_factory=dict)
 

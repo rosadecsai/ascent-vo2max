@@ -1,4 +1,4 @@
-"""Apply the Garmin-like baselines and ASCENT to the athlete's Strava activities.
+"""Apply the reconstructions and ASCENT to the athlete's Strava activities.
 
 The ASCENT configuration is the one frozen after the simulation study (AscentConfig()
 defaults); nothing is tuned on these data.  HRrest = 52 bpm (athlete: 50-55), HRmax = 170 bpm
@@ -19,7 +19,7 @@ from ascent import estimators as es, strava  # noqa: E402
 RES = os.path.join(ROOT, "results")
 HR_REST = 52.0
 HR_MAX_SET = 170.0
-TRAIL_ETA_HAT = 1.035   # what a Garmin-like accelerometer factor would add on average on trails
+TRAIL_ETA_HAT = 1.035   # what an accelerometer terrain factor would add on average on trails
 
 
 def check_frozen():
@@ -41,7 +41,7 @@ def analyse(hr_max, keep_windows=()):
         p["eta_hat"][:] = TRAIL_ETA_HAT if info["surface"] == "trail" else 1.0
         out = dict(info)
         for v in ("flat", "trail", "trail_nodesc", "trail_hrgap"):
-            g = es.garmin_like(p, HR_REST, hr_max, v, return_windows=info["id"] in keep_windows)
+            g = es.reconstruction(p, HR_REST, hr_max, v, return_windows=info["id"] in keep_windows)
             out["G_" + v] = g.get("vo2max", np.nan)
             out["G_" + v + "_n"] = g.get("n", 0)
             if info["id"] in keep_windows and v == "trail":

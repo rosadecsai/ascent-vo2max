@@ -18,7 +18,7 @@ def run_estimators(s, runner, kind, cfg=None, variants=("flat", "trail", "trail_
     hr_max = runner.hr_max if hr_max is None else hr_max
     out = {}
     for v in variants:
-        g = es.garmin_like(p, hr_rest, hr_max, v)
+        g = es.reconstruction(p, hr_rest, hr_max, v)
         out["G_" + v] = g.get("vo2max", np.nan)
         out["G_" + v + "_n"] = g.get("n", 0)
     a = es.ascent(p, hr_rest, hr_max, SURF[kind], cfg)

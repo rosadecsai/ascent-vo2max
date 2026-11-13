@@ -40,7 +40,7 @@ def num(name, val, nd=1, sign=False):
 def tab_main():
     df = pd.read_pickle(os.path.join(RES, "main.pkl"))
     lines = [r"\begin{tabular}{llrrrrr}", r"\toprule",
-             r" & & \multicolumn{4}{c}{Garmin-like reconstructions} & \\ \cmidrule(lr){3-6}",
+             r" & & \multicolumn{4}{c}{Reconstructions} & \\ \cmidrule(lr){3-6}",
              r"Course & Session & " + " & ".join(EST_HDR) + r" \\",
              r"\midrule"]
     for k in ORDER:
@@ -163,8 +163,8 @@ def tab_real():
     halt = hr_alt.replace("real_estimates_hrmax", "").replace(".csv", "")
     num("hrAlt", halt)
     fx = pd.read_csv(os.path.join(RES, "real_effects.csv"))
-    rows_def = [("G_flat", "Garmin-like classic"), ("G_trail@1.035", "Garmin-like trail"),
-                ("G_trail_nodesc@1.035", "Garmin-like no-descent"), ("G_trail_hrgap@1.035", "Garmin-like HR-GAP"),
+    rows_def = [("G_flat", "Classic (reconstruction)"), ("G_trail@1.035", "Trail (reconstruction)"),
+                ("G_trail_nodesc@1.035", "No-descent (reconstruction)"), ("G_trail_hrgap@1.035", "HR-GAP (reconstruction)"),
                 ("ASCENT@1.07", "ASCENT (prior $h=1.07$)"), ("ASCENT@1.035", "ASCENT with $h=1.035$"),
                 ("ASCENT@1.0", "ASCENT with $h=1.00$")]
     cols = [("all", False, "All activities"), ("recent", False, "Jun--Oct 2026"),
@@ -207,7 +207,7 @@ def tab_real():
     num("nRealRecentRoad", str(int(((a.surface == "road") & ~a.race & (a.date >= "2026-06-01")).sum())))
     num("nRealRecentTrail", str(int(((a.surface == "trail") & ~a.race & (a.date >= "2026-06-01")).sum())))
     num("nRealRecentRace", str(int(((a.surface == "trail") & a.race & (a.date >= "2026-06-01")).sum())))
-    # per-race differences from the recent road-training mean (ASCENT and Garmin-like trail)
+    # per-race differences from the recent road-training mean (ASCENT and trail reconstruction)
     rec = a[a.date >= "2026-06-01"]
     road = rec[(rec.surface == "road") & ~rec.race]
     for rid, tag in (("19659497712", "Albondon"), ("20342007439", "Dehesa"), ("19095176093", "RinRan")):
@@ -281,7 +281,7 @@ def tab_mismatch():
     # classic, trail and HR-GAP share one window selection, hence one coverage
     for k in kinds:
         same = df[df.kind == k][["G_flat", "G_trail", "G_trail_hrgap"]].notna()
-        assert (same.nunique(axis=1) == 1).all(), "Garmin-like coverages differ"
+        assert (same.nunique(axis=1) == 1).all(), "coverages of the reconstructions differ"
     pretty = {w: w.replace("+10 %", r"$+10$\,\%").replace("-10 %", r"$-10$\,\%")
               .replace("(+10 %)", r"($+10$\,\%)") for w in worlds}
     ncol = 2 + len(ests)
@@ -313,7 +313,7 @@ def tab_mismatch():
                 ec = c[e] - c["target"]
                 num(f"mmC{wt}{kt}{e.replace('_', '')}", float(ec.mean()), 1, True)
                 num(f"mmCR{wt}{kt}{e.replace('_', '')}", float(np.sqrt(np.mean(ec**2))), 1)
-            # ASCENT on the sessions the Garmin-like methods dropped
+            # ASCENT on the sessions the reconstructions dropped
             dr = d[d["G_trail_hrgap"].isna()]
             num(f"mmRDrop{wt}{kt}", float(np.sqrt(np.mean((dr["ASCENT"] - dr["target"]) ** 2)))
                 if len(dr) >= MIN_N else np.nan, 1)
@@ -339,7 +339,7 @@ def tab_long():
     if not os.path.exists(fp):
         return
     o = pd.read_pickle(fp)
-    tk = {"Garmin-like trail + constant gain": "Garmin", "Garmin-like no-descent + constant gain": "GarminND",
+    tk = {"Trail reconstruction + constant gain": "Garmin", "No-descent reconstruction + constant gain": "GarminND",
           "ASCENT + Kalman": "Kalman", "ASCENT + race-aware Kalman": "Race"}
     for sc, stag in (("race_effect", ""), ("no_race_effect", "NoRE")):
         d = o[o.scenario == sc]
@@ -537,14 +537,14 @@ def tab_v2():
             num(f"vtestN{bt[b]}{tag}", str(int(r[f"n{b}"])))
         num(f"vtestSd{tag}", float(r["sess_sd_flat"]), 2)
         num(f"vtestCov{tag}", float(r["cov_hilly"]), 0)
-    # the Garmin-like reconstructions on the same test half (from the per-run gaps of the full test)
+    # the reconstructions on the same test half (from the per-run gaps of the full test)
     dr = pd.read_pickle(os.path.join(RES, "fitrec_dose.pkl"))
     dr = dr[dr.userId % 2 == 1]
     ez = pd.read_pickle(os.path.join(RES, "fitrec_estimates.pkl"))
     ez = ez[ez.userId % 2 == 1]
     from scipy import stats as _st
     for e, tag, lab in (("G_trail_hrgap", "Ghrgap", "HR-GAP"), ("G_trail_nodesc", "Gnodesc", "No-descent"),
-                        ("G_flat", "Gflat", "Garmin-like classic"), ("G_trail", "Gtrail", "Garmin-like trail")):
+                        ("G_flat", "Gflat", "Classic (reconstruction)"), ("G_trail", "Gtrail", "Trail (reconstruction)")):
         cells = []
         for b in bins:
             u = dr[dr.bin == b].groupby("userId")[e].mean().dropna()

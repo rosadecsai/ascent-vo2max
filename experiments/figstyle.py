@@ -4,18 +4,23 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-# categorical slots (validated: scripts/validate_palette.js, light mode)
-C = {"ASCENT": "#2a78d6", "G_trail": "#eb6834", "G_flat": "#1baf7a", "G_trail_hrgap": "#eda100",
-     "G_trail_nodesc": "#e87ba4"}
+# Categorical slots (first revision): a colour-blind-safe set (Okabe & Ito) in which no two series
+# share a hue family, and every series also has its own marker, line style and hatch, so that the
+# figures can be read without colour.
+C = {"ASCENT": "#000000", "G_trail": "#009E73", "G_flat": "#D55E00", "G_trail_hrgap": "#56B4E9",
+     "G_trail_nodesc": "#CC79A7"}
 MARK = {"ASCENT": "o", "G_trail": "s", "G_flat": "^", "G_trail_hrgap": "D", "G_trail_nodesc": "v"}
-NAME = {"ASCENT": "ASCENT (this work)", "G_trail": "Garmin-like, trail (GAP + terrain + altitude)",
-        "G_flat": "Garmin-like, classic (level running)",
-        "G_trail_hrgap": "Garmin-like, trail with HR-calibrated GAP",
-        "G_trail_nodesc": "Garmin-like, trail without descents"}
-SHORT = {"ASCENT": "ASCENT", "G_trail": "Garmin-like trail", "G_flat": "Garmin-like classic",
-         "G_trail_hrgap": "Garmin-like HR-GAP", "G_trail_nodesc": "Garmin-like no-descent"}
+LS = {"ASCENT": "-", "G_trail": "--", "G_flat": "-", "G_trail_hrgap": "-.", "G_trail_nodesc": ":"}
+HATCH = {"ASCENT": "", "G_trail": "////", "G_flat": "", "G_trail_hrgap": "xxxx", "G_trail_nodesc": "...."}
+NAME = {"ASCENT": "ASCENT (proof of concept)", "G_trail": "Reconstruction: trail (metabolic grade adjustment)",
+        "G_flat": "Reconstruction: classic (level running)",
+        "G_trail_hrgap": "Reconstruction: HR-GAP (HR-calibrated grade adjustment)",
+        "G_trail_nodesc": "Reconstruction: no-descent"}
+SHORT = {"ASCENT": "ASCENT", "G_trail": "Trail (reconstruction)", "G_flat": "Classic (reconstruction)",
+         "G_trail_hrgap": "HR-GAP (reconstruction)", "G_trail_nodesc": "No-descent (reconstruction)"}
+UNIT = "ml·kg$^{-1}$·min$^{-1}$"
 INK, INK2, MUTED, GRID, AXIS = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
-TRUTH = "#0b0b0b"
+TRUTH = "#8a8a8a"
 
 mpl.rcParams.update({
     "font.family": "DejaVu Sans", "font.size": 8.5, "axes.titlesize": 9, "axes.labelsize": 8.5,

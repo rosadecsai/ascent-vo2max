@@ -17,7 +17,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage[round,authoryear]{natbib}
 \usepackage[colorlinks=true,linkcolor={blue!45!black},citecolor={blue!45!black},urlcolor={blue!45!black}]{hyperref}
-\hypersetup{pdftitle={Terrain dependence of heart-rate-based VO2max estimation: mechanisms, a within-runner field test on 9962 runs, and a terrain-robust estimator},pdfauthor={Jos\'e A. Garc\'ia and Rosa Rodriguez-S\'anchez}}
+\hypersetup{pdftitle={Terrain dependence of heart-rate-based VO2max estimation: mechanisms, a within-runner field test on 9962 runs, and a terrain-robust estimator},pdfauthor={Jos\'e A. Garc\'ia, Rosa Rodriguez-S\'anchez and J. Fdez-Valdivia}}
 \setlist{itemsep=2pt,topsep=4pt}
 \setlength{\emergencystretch}{1.5em}
 \input{numbers}
@@ -30,7 +30,7 @@
 \newcommand{\ascent}{ASCENT}
 
 \title{\vspace{-1.2cm}\textbf{Terrain dependence of heart-rate-based \VOmax{} estimation:\\ mechanisms, a within-runner field test on \nnFitrecRuns{} runs,\\ and a terrain-robust estimator}}
-\author{Jos\'e A. Garc\'ia\thanks{Corresponding author, \texttt{jags@decsai.ugr.es}; ORCID 0000-0001-7742-7270.} \and Rosa Rodriguez-S\'anchez\thanks{\texttt{rosa@decsai.ugr.es}. ORCID 0000-0001-7886-9329.}\\[2pt]
+\author{Jos\'e A. Garc\'ia\thanks{Corresponding author, \texttt{jags@decsai.ugr.es}; ORCID 0000-0001-7742-7270.} \and Rosa Rodriguez-S\'anchez\thanks{\texttt{rosa@decsai.ugr.es}; ORCID 0000-0001-7886-9329.} \and J. Fdez-Valdivia\thanks{\texttt{jfv@decsai.ugr.es}; ORCID 0000-0001-7181-1554.}\\[2pt]
 \small Department of Computer Science and Artificial Intelligence, CITIC-UGR, University of Granada, Spain}
 \date{\small Preprint --- October 2026}
 
@@ -42,8 +42,8 @@
 Sports watches estimate maximal oxygen uptake (\VOmax) from the relation between heart rate (HR) and running speed. Trail runners report that the displayed value falls after mountain sessions and recovers on the road. We ask what causes this terrain dependence, how large it is in the field, and what removes it. From the physiological literature we collect seven mechanisms by which steep and technical terrain bias an HR--speed estimate, and quantify each by simulation against four reconstructions of the publicly described Garmin/Firstbeat method; the HR excess on descents, which a metabolic grade adjustment cannot remove, and cardiac drift are the largest. We then propose a within-runner terrain-invariance test that needs no laboratory reference: each run is compared with the same runner's flat runs of the same month. On \nnFitrecRuns{} runs of \nnFitrecRunners{} Endomondo users (FitRec dataset), a reconstruction of the classic method differed from the same runner's flat runs within 30 days by \nfrTrimCGflat{} \unit{} on runs climbing 25--40 m\,km$^{-1}$ and by \nfrTrimDGflat{} above 40 m\,km$^{-1}$, with a clean dose--response in climbing; a metabolic grade adjustment removed little of it. We propose \ascent, a session estimator built from the signals a watch records that models gait-specific grade cost, HR kinetics, an HR-equivalent descent cost, altitude and drift, weights every minute by an error budget, and feeds a Kalman tracker with a learned race-day offset. In simulation its mountain-trail bias was \nbiasASCENTmountain{} against \nbiasGflatmountain{} to \nbiasGtrailhrgapmountain{} for the reconstructions, and the race-aware tracker cut the share of mountain sessions that lowered the displayed value from \nlongDropMtnGarmin\,\% to \nlongDropMtnRace\,\%. On the field data the frozen configuration lost \nfrTrimDASCENTgh{} on the steepest runs (\nfrTrimDASCENT{} once its speed-based gait labels were dropped); a revision developed on half of the runners (fixed HR lag, gait from cadence only, a climbing-based terrain prior, a tighter drift prior) stayed within about $\pm1.5$ \unit{} of the runner's flat runs in every climbing bin on the other half (trimmed means; it over-corrects runs climbing 25--40 m\,km$^{-1}$ by \nvtestCTwo). Against a reconstruction with an HR-calibrated grade adjustment the gain is modest (\nvtestDTwo{} vs.\ \nvtestDGhrgap{} on the steepest held-out runs) and the session values are noisier. The work establishes the mechanisms, the size of the penalty in the field and a method that removes its terrain dependence; absolute accuracy requires a laboratory-referenced study, which we specify. Code is public.
 \end{abstract}
 
-\tableofcontents
-\vspace{0.4cm}
+\noindent\textbf{Keywords:} maximal oxygen uptake; wearable sensors; heart rate; trail running; grade-adjusted pace; Kalman filter; terrain invariance.
+
 
 % =========================================================================================
 \section{Introduction}
@@ -463,7 +463,7 @@ A manufacturer can run this on its own research platform with its own estimator 
 
 \paragraph{Data and code availability.} The code (estimators, simulation, experiments and the scripts that produce every number, table and figure) is available at \url{https://github.com/rosadecsai/ascent-vo2max}. The FitRec dataset is available from its authors for academic use \citep{ni2019} and is not redistributed; the extraction script is included.
 
-\paragraph{Author contributions.} J.A.G.: conception, methodology, software, experiments, writing. R.R.-S.: methodology, analysis and interpretation of the field test, writing and critical revision.
+\paragraph{Author contributions.} All authors contributed equally to the conception and design of the work, the analysis and interpretation of the results, and the writing and revision of the manuscript.
 
 \paragraph{Declaration of generative AI use.} Claude (Anthropic) was used to revise the manuscript (language, consistency of the numbers with the tables and cross-references) and to review and correct the code. The authors directed and verified this use and take full responsibility for the content.
 

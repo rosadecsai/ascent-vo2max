@@ -1,5 +1,5 @@
 """Terrain-invariance test on FitRec (Endomondo) runs: estimate VO2max with ASCENT and the
-Garmin-like reconstructions for every selected run of every selected runner.
+reconstructions for every selected run of every selected runner.
 
 Selection (from results/fitrec_desc.pkl, written by fitrec_describe.py):
   runs >= 25 min, >= 80 % moving, median HR > 100 bpm, sample spacing <= 30 s (the workouts
@@ -9,7 +9,7 @@ Selection (from results/fitrec_desc.pkl, written by fitrec_describe.py):
   terrain class from climbing per km on the smoothed altitude: flat <= 8, hilly >= 25 m/km;
   runners with >= 5 flat and >= 5 hilly runs; per runner at most 30 flat, 60 hilly, 20 mid runs
   (the most recent ones, so that flat and hilly runs interleave in time).
-Garmin-like variants exclude slow steep uphill (walking heuristic); ASCENT uses no gait labels.
+Reconstructions exclude slow steep uphill (walking heuristic); ASCENT uses no gait labels.
 HR anchors per runner: HRmax = 95th percentile of the per-run 99th-percentile HR over all the
 runner's runs (clipped to 150-210), HRrest = 55 bpm for everybody (unknown).  Surface class
 'road' and accelerometer factor 1.0 for every run (the terrain of a run is unknown).
@@ -57,7 +57,7 @@ def job(args):
     out = []
     for r in rows:
         try:
-            # Garmin-like: slow steep uphill treated as walking and excluded (a watch has cadence);
+            # reconstructions: slow steep uphill treated as walking and excluded (a watch has cadence);
             # ASCENT: no gait labels without cadence (ASCENT_gh: with the same heuristic)
             ph = fr.prep(r, walk_heuristic=True)
             p = fr.prep(r)
@@ -65,7 +65,7 @@ def job(args):
             hm = float(r["hr_max_u"])
             o["ASCENT_gh"] = es.ascent(ph, HR_REST, hm, "road").get("vo2max", np.nan)
             for v in ("flat", "trail", "trail_nodesc", "trail_hrgap"):
-                g = es.garmin_like(ph, HR_REST, hm, v)
+                g = es.reconstruction(ph, HR_REST, hm, v)
                 o["G_" + v] = g.get("vo2max", np.nan)
                 o["G_" + v + "_n"] = g.get("n", 0)
             a = es.ascent(p, HR_REST, hm, "road")

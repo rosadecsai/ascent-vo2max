@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from figstyle import plt, save, C, MARK, NAME, SHORT, INK, INK2, MUTED, GRID, TRUTH  # noqa: E402
+from figstyle import plt, save, C, MARK, LS, HATCH, NAME, SHORT, UNIT, INK, INK2, MUTED, GRID, TRUTH  # noqa: E402
 from common import sm, es, SURF, LABEL  # noqa: E402
 from ascent import physiology as ph  # noqa: E402
 
@@ -32,13 +32,13 @@ def fig_main():
             few = g.count() < 10                      # too few estimates: not shown
             m[few], s[few] = np.nan, np.nan
             y = np.arange(len(ORDER)) + (j - 2.0) * 0.15
-            ax.errorbar(m[ORDER], y, xerr=s[ORDER], fmt=MARK[e], color=C[e], ms=4.2,
-                        elinewidth=1.0, capsize=0, label=SHORT[e],
-                        mec="white", mew=0.6, zorder=3)
+            eb = ax.errorbar(m[ORDER], y, xerr=s[ORDER], fmt=MARK[e], color=C[e], ms=4.6,
+                             elinewidth=1.1, capsize=0, label=SHORT[e],
+                             mfc=("white" if e in ("G_trail", "G_trail_nodesc") else C[e]), mec=C[e], mew=1.0, zorder=3)
+            eb[-1][0].set_linestyle(LS[e])
         ax.axvline(0, color=INK2, lw=0.9, zorder=2)
         ax.set_yticks(range(len(ORDER)))
         ax.set_yticklabels([LABEL[k] for k in ORDER])
-        ax.set_xlabel("Error vs true VO$_2$max (ml·kg$^{-1}$·min$^{-1}$)")
         ax.set_title("Race sessions" if race else "Training sessions", loc="left")
         ax.set_xlim(-31, 6)
         ax.grid(axis="y", visible=False)
@@ -46,6 +46,8 @@ def fig_main():
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, loc="upper center", ncol=3, fontsize=7.2, bbox_to_anchor=(0.5, 1.08),
                handletextpad=0.3)
+    fig.supxlabel("Error of the session estimate against the simulated true value (" + UNIT + "), mean ± SD",
+                  fontsize=8.5, color=INK2)
     fig.tight_layout(rect=(0, 0, 1, 0.92))
     save(fig, os.path.join(FIG, "fig_main_bias.pdf"))
 
@@ -56,7 +58,7 @@ def fig_example(seed=7, kind="mountain"):
                          walk_econ=1.0, ecc_lambda=0.7, drift=0.06)
     s = sm.random_session(r, kind, True, rng)
     p = es.prep(s.t, s.hr, s.dist, s.alt, s.cad, s.eta_hat)
-    g = es.garmin_like(p, r.hr_rest, r.hr_max, "trail", return_windows=True)
+    g = es.reconstruction(p, r.hr_rest, r.hr_max, "trail", return_windows=True)
     a = es.ascent(p, r.hr_rest, r.hr_max, SURF[kind], return_windows=True)
     W, GW = a["windows"], g["windows"]
     tmin = p["t"] / 60.0
@@ -71,8 +73,8 @@ def fig_example(seed=7, kind="mountain"):
     walk = s.truth["walk"]
     ax.fill_between(tmin, lo, lo + 0.07 * zr, where=desc, color="#898781", lw=0, step="mid",
                     label="descent (grade < −5 %)")
-    ax.fill_between(tmin, lo + 0.08 * zr, lo + 0.15 * zr, where=walk, color="#6da7ec", lw=0,
-                    step="mid", label="power-hiking")
+    ax.fill_between(tmin, lo + 0.08 * zr, lo + 0.15 * zr, where=walk, color="#E69F00", lw=0,
+                    step="mid", label="power-hiking (walking uphill)")
     ax.set_ylim(lo - 0.02 * zr, z.max() + 0.08 * zr)
     ax.set_ylabel("Altitude (m)")
     ax.legend(loc="upper left", ncol=2, bbox_to_anchor=(0.0, 1.0))
@@ -91,7 +93,7 @@ def fig_example(seed=7, kind="mountain"):
     ax = axes[2]
     gok = GW["ok"]
     ax.plot((GW["start"][gok] + 15) / 60.0, GW["vmax"][gok], MARK["G_trail"], color=C["G_trail"],
-            ms=3.2, mec="none", alpha=0.85, label="Garmin-like trail: per-window values")
+            ms=3.4, mfc="white", mew=0.9, label="Trail reconstruction: per-window values")
     yv = (W["hr"] - r.hr_rest) / (1 + a["drift"] * W["t"])
     vw = (ph.VO2_REST + (r.hr_max - r.hr_rest) * W["x0"] / np.maximum(yv, 1e-6)) / W["A"]
     w = np.zeros(st.size)
@@ -99,10 +101,10 @@ def fig_example(seed=7, kind="mountain"):
     sz = 2 + 40 * w / w.max()
     ax.scatter(tw[ok], vw[ok], s=sz[ok], color=C["ASCENT"], alpha=0.7, lw=0,
                label="ASCENT: per-window values (size = weight)")
-    ax.axhline(r.target, color=TRUTH, lw=1.0, label=f"truth {r.target:.1f}")
+    ax.axhline(r.target, color=TRUTH, lw=3.0, alpha=0.8, label=f"simulated true value {r.target:.1f}", zorder=1)
     ax.axhline(g["vo2max"], color=C["G_trail"], lw=1.2, ls="--",
-               label=f"Garmin-like session value {g['vo2max']:.1f}")
-    ax.axhline(a["vo2max"], color=C["ASCENT"], lw=1.2, ls="--",
+               label=f"Trail reconstruction, session value {g['vo2max']:.1f}")
+    ax.axhline(a["vo2max"], color=C["ASCENT"], lw=1.2, ls="-",
                label=f"ASCENT session value {a['vo2max']:.1f}")
     ax.set_ylim(5, 75)
     ax.set_ylabel("VO$_2$max (ml·kg$^{-1}$·min$^{-1}$)")
@@ -117,7 +119,7 @@ def fig_example(seed=7, kind="mountain"):
 MECH_LABEL = {"gps_bias": "GPS path shortening", "terrain": "terrain roughness (unknown η)",
               "ecc": "HR excess on descents", "kinetics": "HR kinetics (lag)",
               "drift": "cardiac drift", "altitude": "altitude", "stops": "stops",
-              "walk": "power-hiking", "econ_mismatch": "individual economies",
+              "walk": "power-hiking (walking uphill)", "econ_mismatch": "individual economies",
               "curvature": "HR–VO$_2$ curvature", "obstacles": "obstacles"}
 
 
@@ -137,13 +139,14 @@ def fig_attribution(kinds=("trail_runnable", "mountain", "skyrun")):
                 d = df[(df.cond == "no_" + m) & (df.kind == kind)].set_index(["seed", "kind"])
                 b = base.loc[d.index, "e_" + e]
                 vals.append(np.nanmean(b.values - d["e_" + e].values))
-            ax.barh(y + (j - 0.5) * 0.38, vals, height=0.34, color=C[e], label=SHORT[e])
+            ax.barh(y + (j - 0.5) * 0.38, vals, height=0.34, color=("white" if j else C[e]), edgecolor=C[e],
+                    hatch=("////" if j else ""), linewidth=0.8, label=SHORT[e])
         ax.axvline(0, color=INK2, lw=0.8)
         ax.set_yticks(y)
         ax.set_yticklabels([MECH_LABEL[m] for m in mechs])
         ax.invert_yaxis()
         ax.set_title(LABEL[kind], loc="left")
-        ax.set_xlabel("Contribution to bias")
+        ax.set_xlabel("Change of the error\n(" + UNIT + ")")
         ax.grid(axis="y", visible=False)
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, loc="upper center", ncol=2, fontsize=7.5, bbox_to_anchor=(0.5, 1.05))
@@ -163,12 +166,14 @@ def fig_ablation():
     variants = list(out["ablation"]["variant"].drop_duplicates())
     fig, axes = plt.subplots(1, len(out), figsize=(6.6, 2.9), sharey=True)
     axes = np.atleast_1d(axes)
-    seq = ["#9ec5f4", "#5598e7", "#256abf", "#0d366b"]
+    seq = ["#56B4E9", "#009E73", "#D55E00", "#000000"]
+    mk = ["o", "s", "^", "D"]
     for ax, (nm, d) in zip(axes, out.items()):
         y = np.arange(len(variants))
         for j, k in enumerate(kinds):
             rm = [np.sqrt(np.nanmean(d[(d.variant == v) & (d.kind == k)]["err"] ** 2)) for v in variants]
-            ax.plot(rm, y + (j - 1.5) * 0.12, "o", color=seq[j], ms=4, label=LABEL[k])
+            ax.plot(rm, y + (j - 1.5) * 0.12, mk[j], color=seq[j], ms=4.2, mfc=("white" if j % 2 else seq[j]),
+                    mew=1.0, label=LABEL[k])
         ax.set_yticks(y)
         ax.set_yticklabels(variants)
         ax.set_xlabel("RMSE (ml·kg$^{-1}$·min$^{-1}$)")
@@ -199,8 +204,8 @@ def fig_sensitivity():
         for e in ests:
             g = (x[e] - x["target"]).groupby(x["level"])
             ax.errorbar(g.mean().index, g.mean().values, yerr=g.std().values / np.sqrt(g.count().values) * 1.96,
-                        color=C[e], marker=MARK[e], ms=3.5, lw=1.2, elinewidth=0.8, capsize=0,
-                        label=SHORT[e])
+                        color=C[e], marker=MARK[e], ms=3.5, lw=1.2, ls=LS[e], elinewidth=0.8, capsize=0,
+                        mfc=("white" if e in ("G_trail", "G_trail_nodesc") else C[e]), mew=0.9, label=SHORT[e])
         ax.axhline(0, color=INK2, lw=0.8)
         ax.set_title(SENS_LABEL[f], loc="left", fontsize=7.8)
         ax.tick_params(labelsize=7)
@@ -258,7 +263,7 @@ def fig_real_time():
         d = df[df.race]
         ax.plot(d["dt"], d[e], "*", color=C[e], ms=7)
     ax.step(df["dt"], df["disp_G_trail"], where="post", color=C["G_trail"], lw=1.6,
-            label="Garmin-like trail, constant-gain display")
+            label="Trail reconstruction, constant-gain display")
     ax.step(df["dt"], df["disp_ASCENT_race"], where="post", color=C["ASCENT"], lw=1.6,
             label="ASCENT, race-aware Kalman display")
     ax.plot([], [], "o", color=MUTED, ms=3.8, label="road training")
@@ -299,7 +304,7 @@ def fig_real_sessions(ids=("20374217194", "19095176093")):
         ax = axes[2, j]
         gok = GW["ok"]
         ax.plot((GW["start"][gok] + 15) / 60.0, GW["vmax"][gok], "s", color=C["G_trail"], ms=2.8,
-                mec="none", alpha=0.85, label="Garmin-like trail, per window")
+                mec="none", alpha=0.85, label="Trail reconstruction, per window")
         yv = (W["hr"] - 52.0) / (1 + dr * W["t"])
         vw = (ph.VO2_REST + 118.0 * W["x0"] / np.maximum(yv, 1e-6)) / W["A"]
         w = np.zeros(st.size)
@@ -321,16 +326,16 @@ def longitudinal_tables():
     df = pd.read_pickle(os.path.join(RES, "longitudinal.pkl"))
     rows, traj = [], {}
     for (sc, seed), d in df.sort_values("day").groupby(["scenario", "seed"]):
-        trk = {"Garmin-like trail + constant gain": es.EWMADisplay(0.3),
-               "Garmin-like no-descent + constant gain": es.EWMADisplay(0.3),
+        trk = {"Trail reconstruction + constant gain": es.EWMADisplay(0.3),
+               "No-descent reconstruction + constant gain": es.EWMADisplay(0.3),
                "ASCENT + Kalman": es.KalmanTracker(),
                "ASCENT + race-aware Kalman": es.RaceAwareTracker()}
         prev = {k: None for k in trk}
         for _, r in d.iterrows():
             for k, t in trk.items():
-                if k.startswith("Garmin-like no-descent"):
+                if k.startswith("No-descent reconstruction"):
                     m = t.update(r["day"], r["G_trail_nodesc"])
-                elif k.startswith("Garmin"):
+                elif k.startswith("Trail reconstruction"):
                     m = t.update(r["day"], r["G_trail"])
                 elif "race-aware" in k:
                     m = t.update(r["day"], r["ASCENT"], r["ASCENT_sd"], race=bool(r["race"]))
@@ -355,39 +360,46 @@ def fig_longitudinal():
     else:
         out = longitudinal_tables()
         out.to_pickle(fp)                       # make_tables.tab_long reads this file
-    trackers = ["Garmin-like trail + constant gain", "Garmin-like no-descent + constant gain",
+    trackers = ["Trail reconstruction + constant gain", "No-descent reconstruction + constant gain",
                 "ASCENT + Kalman", "ASCENT + race-aware Kalman"]
-    col = {trackers[0]: C["G_trail"], trackers[1]: C["G_trail_nodesc"], trackers[2]: "#86b6ef",
+    col = {trackers[0]: C["G_trail"], trackers[1]: C["G_trail_nodesc"], trackers[2]: C["G_trail_hrgap"],
            trackers[3]: C["ASCENT"]}
+    lst = {trackers[0]: "--", trackers[1]: ":", trackers[2]: "-.", trackers[3]: "-"}
+    hat = {trackers[0]: "////", trackers[1]: "....", trackers[2]: "xxxx", trackers[3]: ""}
+    lab = {trackers[0]: "Trail reconstruction + constant-gain display",
+           trackers[1]: "No-descent reconstruction + constant-gain display",
+           trackers[2]: "ASCENT + Kalman tracker", trackers[3]: "ASCENT + race-aware Kalman tracker"}
     fig, axes = plt.subplots(1, 2, figsize=(6.6, 3.3), gridspec_kw=dict(width_ratios=[1.35, 1]))
     ax = axes[0]
     d = out[(out.scenario == "race_effect")]
     seed = sorted(d.seed.unique())[3]
     e = d[d.seed == seed]
     t0 = e[e.tracker == trackers[0]]
-    ax.plot(t0["day"] / 7, t0["target"], color=TRUTH, lw=1.0, label="true VO$_2$max")
+    ax.plot(t0["day"] / 7, t0["target"], color=TRUTH, lw=3.0, alpha=0.8, label="simulated true value", zorder=1)
     for k in trackers:
         x = e[e.tracker == k]
-        ax.step(x["day"] / 7, np.round(x["display"]), where="post", color=col[k], lw=1.5,
-                label=k + " (rounded display)")
+        ax.step(x["day"] / 7, np.round(x["display"]), where="post", color=col[k], lw=1.5, ls=lst[k],
+                label=lab[k])
     rc = t0[t0.cat == "race"]
     ylo = np.nanmin(np.round(e["display"])) - 2.5
     ax.plot(rc["day"] / 7, np.full(len(rc), ylo + 0.6), "*", color=INK2, ms=7, label="race day")
     ax.set_ylim(ylo, np.nanmax(t0["target"]) + 1.5)
     ax.set_xlabel("Week")
-    ax.set_ylabel("Displayed VO$_2$max")
+    ax.set_ylabel("Displayed value, rounded (" + UNIT + ")")
     ax.set_title("One simulated runner (race-day HR inflation on)", loc="left", fontsize=8)
+    ax.grid(axis="x", visible=False)
     ax = axes[1]
     cats = ["road", "runnable trail", "mountain trail", "race"]
     y = np.arange(len(cats))
     for j, k in enumerate(trackers):
         m = [d[(d.tracker == k) & (d.cat == c)]["change"].mean() for c in cats]
-        ax.barh(y + (j - 1.5) * 0.2, m, height=0.18, color=col[k])
+        ax.barh(y + (j - 1.5) * 0.2, m, height=0.18, color=("white" if hat[k] else col[k]), edgecolor=col[k],
+                hatch=hat[k], linewidth=0.8)
     ax.axvline(0, color=INK2, lw=0.8)
     ax.set_yticks(y)
     ax.set_yticklabels(cats)
     ax.invert_yaxis()
-    ax.set_xlabel("Mean change of the displayed value")
+    ax.set_xlabel("Mean change of the displayed value\n(" + UNIT + ")")
     ax.grid(axis="y", visible=False)
     ax.set_title("After each session type, 40 runners", loc="left", fontsize=8)
     h, l = axes[0].get_legend_handles_labels()

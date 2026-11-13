@@ -1,4 +1,4 @@
-"""VO2max estimators: Garmin/Firstbeat-like baselines and the mountain-adapted ASCENT.
+"""VO2max estimators: reconstructions of the publicly described HR-speed method, and ASCENT.
 
 All estimators take the same 1-Hz inputs a GPS watch records (time, HR, GPS distance,
 barometric altitude, cadence) plus the user's resting and maximal heart rate.
@@ -27,7 +27,7 @@ from . import physiology as ph
 
 WIN = 30            # s, analysis window
 WARMUP = 300        # s ignored at the start by ASCENT
-WARMUP_G = 180      # s ignored at the start by the Garmin-like baselines
+WARMUP_G = 180      # s ignored at the start by the reconstructions
 
 
 # ----------------------------------------------------------------------------------------
@@ -88,14 +88,16 @@ def _wmean(a, starts):
 
 
 # ----------------------------------------------------------------------------------------
-# Garmin / Firstbeat-like baselines
+# Reconstructions of the publicly described HR-speed method (not any manufacturer's algorithm)
 # ----------------------------------------------------------------------------------------
-def garmin_like(p, hr_rest, hr_max, variant="trail", min_windows=20, return_windows=False):
-    """Reconstruction of the publicly described Firstbeat/Garmin running method.
+def reconstruction(p, hr_rest, hr_max, variant="trail", min_windows=20, return_windows=False):
+    """Reconstruction of the publicly described HR-speed running method (Firstbeat white paper).
+
+    Only the principle is public; every numerical setting below is our own implementation choice.
 
     variant 'flat'  : level ACSM speed->VO2, no grade, no altitude correction.
     variant 'trail' : Minetti grade-adjusted speed x accelerometer terrain factor,
-                      altitude-corrected (Garmin trail-run VO2max, 2021+ firmware).
+                      altitude-corrected (our reading of a third-party description of a trail estimate).
     variant 'trail_hrgap' : as 'trail' but with a heart-rate-calibrated (Strava-like) GAP.
     variant 'trail_nodesc': as 'trail' but descending windows (grade < -3 %) are discarded
                       (a 'steel-man' reconstruction that never trusts descents).
@@ -143,6 +145,9 @@ def garmin_like(p, hr_rest, hr_max, variant="trail", min_windows=20, return_wind
     if return_windows:
         res["windows"] = dict(start=st, ok=ok, vmax=vmax_w, grade=gw, hr=hrw, v=vw)
     return res
+
+
+garmin_like = reconstruction    # former name, kept so that existing scripts keep working
 
 
 # ----------------------------------------------------------------------------------------

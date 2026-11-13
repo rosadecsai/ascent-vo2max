@@ -53,7 +53,7 @@ def strava_like_factor(i):
 
     Uphill it follows Minetti; downhill it has a shallow minimum of 0.88 at -9 % and is back
     to 1.0 at -18 % (Robb 2017), rising slowly beyond.  Used (i) by the simulator to
-    represent the heart-rate excess seen on descents and (ii) by a Garmin-like variant.
+    represent the heart-rate excess seen on descents and (ii) by the HR-GAP reconstruction.
     """
     i = np.asarray(i, float)
     up = rel_cost_run(np.maximum(i, 0.0))

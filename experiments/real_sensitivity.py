@@ -40,9 +40,9 @@ def run_all(hr_max):
         for eh in (1.0, 1.035, 1.07):
             p["eta_hat"][:] = eh if info["surface"] == "trail" else 1.0
             for v in ("trail", "trail_nodesc", "trail_hrgap"):
-                out[f"G_{v}@{eh}"] = es.garmin_like(p, HR_REST, hr_max, v)["vo2max"]
+                out[f"G_{v}@{eh}"] = es.reconstruction(p, HR_REST, hr_max, v)["vo2max"]
         p["eta_hat"][:] = 1.0
-        out["G_flat"] = es.garmin_like(p, HR_REST, hr_max, "flat")["vo2max"]
+        out["G_flat"] = es.reconstruction(p, HR_REST, hr_max, "flat")["vo2max"]
         for h in (1.0, 1.035, 1.07):
             cfg = es.AscentConfig(h_prior={"road": (1.0, 0.03), "trail": (h, 0.06)})
             out[f"ASCENT@{h}"] = es.ascent(p, HR_REST, hr_max, info["surface"], cfg)["vo2max"]

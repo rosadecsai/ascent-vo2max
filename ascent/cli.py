@@ -1,6 +1,6 @@
-"""Run ASCENT and the Garmin-like reconstructions on exported activities.
+"""Run ASCENT and the reconstructions on exported activities.
 
-    python3 -m ascent.cli FILE [FILE ...] --hr-rest 52 --hr-max 170
+    python3 -m ascent.cli FILE [FILE ...] --hr-rest 50 --hr-max 185
                           [--surface auto|road|trail] [--race] [--history my_vo2max.csv]
 
 FILE: .fit (Garmin "Export Original", needs `pip install fitdecode`), .tcx, .gpx or Strava-stream
@@ -27,7 +27,7 @@ import numpy as np
 from . import estimators as es
 from .io import read_activity
 
-TRAIL_ETA_HAT = 1.035       # Garmin-like accelerometer terrain factor assumed on trails
+TRAIL_ETA_HAT = 1.035       # accelerometer terrain factor of the trail reconstruction assumed on trails
 FIELDS = ["start", "date", "file", "surface", "race", "km", "dplus_m", "minutes", "ascent", "ascent_sd",
           "tau_s", "drift_pct_h", "share_climb", "share_flat", "share_descent", "share_walk",
           "garmin_like_classic", "garmin_like_trail", "garmin_like_nodescent", "garmin_like_hrgap",
@@ -52,7 +52,7 @@ def analyse(path, hr_rest, hr_max, surface="auto", race=False, version=2):
                hr_p995=float(np.percentile(a["hr"], 99.5)))
     for v, k in (("flat", "classic"), ("trail", "trail"), ("trail_nodesc", "nodescent"),
                  ("trail_hrgap", "hrgap")):
-        out["garmin_like_" + k] = es.garmin_like(p, hr_rest, hr_max, v).get("vo2max", np.nan)
+        out["garmin_like_" + k] = es.reconstruction(p, hr_rest, hr_max, v).get("vo2max", np.nan)
     out["_surface_assumed"] = surface == "auto" and a["surface"] is None
     out["_h_prior"] = res.get("h_prior", np.nan)
     out["_if_valid"] = res.get("vo2max_if_valid", np.nan)
@@ -77,7 +77,7 @@ def report(o, hr_max):
     else:
         extra = f" (unreliable fit: {o['_if_valid']:.1f})" if np.isfinite(o["_if_valid"]) else ""
         print(f"  ASCENT       no valid estimate{extra}")
-    print(f"  Garmin-like  classic {_fmt(o['garmin_like_classic'])} | trail {_fmt(o['garmin_like_trail'])} | "
+    print(f"  Reconstructions: classic {_fmt(o['garmin_like_classic'])} | trail {_fmt(o['garmin_like_trail'])} | "
           f"no-descent {_fmt(o['garmin_like_nodescent'])} | HR-GAP {_fmt(o['garmin_like_hrgap'])}")
     if o["hr_p995"] > hr_max:
         print(f"  note: recorded HR reaches {o['hr_p995']:.0f} bpm (99.5th percentile), above the HRmax "

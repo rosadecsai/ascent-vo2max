@@ -1,0 +1,12 @@
+step,runs,runners
+"runs with HR, GPS and altitude",104498,848
+duration >= 25 min,89277,843
+moving > 80 % of the time,85353,835
+median HR > 100 bpm,84993,832
+mean sample spacing <= 30 s,84466,832
+mean altitude -100 to 3500 m,83865,831
+climbing <= 150 m/km,83806,831
+gain/loss imbalance <= 0.5,81269,830
+altitude roughness <= 5 m,81215,830
+>= 5 flat and >= 5 hilly runs per runner,32528,158
+"most recent 30 flat, 60 hilly, 20 intermediate",9962,158

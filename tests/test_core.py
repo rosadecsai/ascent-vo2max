@@ -48,7 +48,7 @@ def _ideal_session(kind, seed=0, extra=None):
 def test_flat_road_recovery():
     for seed in range(3):
         r, p = _ideal_session("road_flat", seed)
-        g = es.garmin_like(p, r.hr_rest, r.hr_max, "flat")
+        g = es.reconstruction(p, r.hr_rest, r.hr_max, "flat")
         cfg = es.AscentConfig(use_altitude=False)
         a = es.ascent(p, r.hr_rest, r.hr_max, "road", cfg)
         assert abs(g["vo2max"] - r.target) < 1.0, (g["vo2max"], r.target)
